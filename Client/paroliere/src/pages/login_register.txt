@@ -1,0 +1,140 @@
+import { useState } from "react";
+
+function Login_Register() {
+    const [showRegister, setShowRegister] = useState(false);
+    const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const loginregisterStyle = {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "10px",
+        maxWidth: "300px",
+        margin: "0 auto"
+    };
+
+    const formStyle = {
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        gap: "10px"
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setMessage('');
+        
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+            setMessage('Le password non coincidono');
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password // Il backend si occuperà dell'hashing
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setMessage('Registrazione completata! Ora puoi accedere.');
+                setShowRegister(false);
+            } else {
+                setMessage(data.message || 'Errore durante la registrazione');
+            }
+        } catch (error) {
+            setMessage('Errore di connessione');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setMessage('');
+        
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password // Il backend si occuperà del confronto
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setMessage('Accesso effettuato con successo!');
+                // Qui potresti salvare il token JWT o reindirizzare
+                // localStorage.setItem('token', data.token);
+                // window.location.href = '/dashboard';
+            } else {
+                setMessage(data.message || 'Credenziali non valide');
+            }
+        } catch (error) {
+            setMessage('Errore di connessione');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div style={loginregisterStyle}>
+            {message && <div style={{color: message.includes('success') ? 'green' : 'red'}}>{message}</div>}
+            
+            {showRegister ? (
+                <>
+                    <h1>Registrati</h1>
+                    <form style={formStyle} onSubmit={handleRegister}>
+                        <label htmlFor="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" required />
+                        <label htmlFor="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" required />
+                        <label htmlFor="registerConfirmPassword">Conferma Password</label>
+                        <input type="password" id="registerConfirmPassword" required />
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? 'Caricamento...' : 'Registrati'}
+                        </button>
+                    </form>
+                    <p>Hai già un account? <button onClick={() => setShowRegister(false)}>Accedi</button></p>
+                </>
+            ) : (
+                <>
+                    <h1>Accedi</h1>
+                    <form style={formStyle} onSubmit={handleLogin}>
+                        <label htmlFor="loginUsername">Username</label>
+                        <input type="text" id="loginUsername" required />
+                        <label htmlFor="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required />
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? 'Caricamento...' : 'Accedi'}
+                        </button>
+                    </form>
+                    <p>Non hai un account? <button onClick={() => setShowRegister(true)}>Registrati</button></p>
+                </>
+            )}
+        </div>
+    );
+}
+
+export default Login_Register;

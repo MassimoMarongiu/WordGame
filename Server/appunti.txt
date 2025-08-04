@@ -1,0 +1,90 @@
+connessione al server da esterno
+
+powershell
+netsh advfirewall firewall add rule name="Node.js Server" dir=in action=allow protocol=TCP localport=3000
+
+blocco connessione esterna
+powershell
+netsh advfirewall firewall delete rule name="Node.js Server" protocol=TCP localport=3000
+
+Modifiche a playGame.js
+javascript
+const { getGameState, addPlayer, nextTurn, setWinner, resetGame } = require('./gameState');
+const { assignPrize } = require('./winners');
+
+// Modifica il handler per gestire i turni
+router.post('/playGame', (req, res) => {
+    const { type, userId } = req.body;
+    const gameState = getGameState();
+
+    // Verifica che sia il turno del giocatore
+    if (gameState.players[gameState.currentPlayerIndex] !== userId) {
+        return res.status(400).json({ error: "Non è il tuo turno" });
+    }
+
+    // Gestisci la logica del gioco...
+    
+    // Passa il turno
+    nextTurn();
+    res.json({ success: true, letter: newLetter, currentPlayer: gameState.players[gameState.currentPlayerIndex] });
+});
+Modifiche a winners.js
+javascript
+async function determineWinner() {
+    const gameState = getGameState();
+    
+    if (gameState.winner) {
+        // Assegna il premio al vincitore
+        await assignPrize(gameState.winner);
+    } else {
+        // Pareggio - dividi il premio
+        const prize = getPrizeMoney();
+        const halfPrize = Math.floor(prize / 2);
+        
+        for (const player of gameState.players) {
+            await db.query(
+                'UPDATE user_credits SET amount = amount + ? WHERE user_id = ?',
+                [halfPrize, player]
+            );
+        }
+        
+        resetPrizeMoney();
+    }
+    
+    resetGame();
+}
+2. Modifiche al Frontend (React)
+InGame.jsx
+javascript
+const [currentPlayer, setCurrentPlayer] = useState(null);
+
+// Quando un giocatore si unisce
+const joinGame = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const response = await axios.post('/joinGame', { userId: user.id });
+    setCurrentPlayer(response.data.currentPlayer);
+};
+
+// Quando richiedi una lettera
+async function handleConsonantClick() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const response = await axios.post('/playGame', {
+            type: "consonant",
+            userId: user.id
+        });
+        
+        setCurrentPlayer(response.data.currentPlayer);
+        // Aggiorna lo stato del gioco...
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Aggiungi al return:
+<Button 
+    onClick={joinGame}
+    buttonName="Unisciti al gioco"
+    disabled={gameState.players.length >= 2}
+/>
+<div>Turno di: {currentPlayer === userId ? "Tu" : "Avversario"}</div>

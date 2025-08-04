@@ -1,0 +1,102 @@
+const db = require("./connection");
+const { addToPrizeMoney, getPrizeMoney } = require('./prizePool');
+
+async function credits(req, res) {
+    console.log('Ricevuta richiesta credits:', req.method, req.body);
+
+    try {
+        if (req.method === "POST") {
+            const { type, userId } = req.body;
+
+            if (!userId) {
+                console.log('UserId mancante nel body');
+                return res.status(400).json({ error: "userId mancante" });
+            }
+
+            // Determina il costo in base al tipo di lettera
+            const cost = type === "consonant" ? 5 : 10;
+
+            // 1. Verifica che l'utente abbia abbastanza crediti
+            const checkSql = 'SELECT amount FROM user_credits WHERE user_id = ?';
+            db.query(checkSql, [userId], (err, results) => {
+                if (err) {
+                    console.error('Errore database:', err);
+                    return res.status(500).json({ error: "Errore del database" });
+                }
+
+                if (results.length === 0 || results[0].amount < cost) {
+                    return res.status(400).json({
+                        error: "Crediti insufficienti",
+                        required: cost,
+                        available: results.length > 0 ? results[0].amount : 0
+                    });
+                }
+
+                // 2. Aggiorna i crediti
+                const updateSql = 'UPDATE user_credits SET amount = amount - ? WHERE user_id = ?';
+                db.query(updateSql, [cost, userId], (err, updateResults) => {
+                    if (err) {
+                        console.error('Errore aggiornamento:', err);
+                        return res.status(500).json({ error: "Errore nell'aggiornamento" });
+                    }
+
+                    // 3. Restituisci il nuovo saldo
+                    db.query(checkSql, [userId], (err, finalResults) => {
+                        if (err) {
+                            console.error('Errore verifica finale:', err);
+                            return res.status(500).json({ error: "Errore verifica saldo" });
+                        }
+
+                        const message = type === "consonant"
+                            ? "Consonante richiesta (-5 crediti)"
+                            : "Vocale richiesta (-10 crediti)";
+
+                        // Incrementa il montepremi globale
+                        const prizeIncrement = type === "consonant" ? 5 : 10;
+                        addToPrizeMoney(prizeIncrement);
+                        const currentPriceMoney = getPrizeMoney(); 
+                        // getPrizeMoney();
+
+
+                        
+                        // globalPrizeMoney += prizeIncrement;
+                        // console.log("montepremi attuale "+prizeIncrement);
+
+                        res.status(200).json({
+                            success: true,
+                            message,
+                            type,
+                            userId,
+                            newAmount: finalResults[0].amount,
+                            deducted: cost,
+                            currentAmount:currentPriceMoney
+                        });
+                    });
+                });
+            });
+            return;
+        }
+
+        // Gestione GET (per altre richieste)
+        const userId = req.query.userId;
+        if (!userId) {
+            console.log('UserId mancante nella query');
+            return res.status(400).json({ error: "userId mancante" });
+        }
+
+        const sql = 'SELECT amount FROM user_credits WHERE user_id = ?';
+        db.query(sql, [userId], (err, results) => {
+            if (err) {
+                console.error('Errore database:', err);
+                return res.status(500).json({ error: "Errore del database" });
+            }
+            res.status(200).json(results.length === 0 ? { amount: 0 } : results[0]);
+        });
+
+    } catch (err) {
+        console.error('Errore generale:', err);
+        return res.status(500).json({ error: "Errore interno del server" });
+    }
+}
+
+module.exports = credits;

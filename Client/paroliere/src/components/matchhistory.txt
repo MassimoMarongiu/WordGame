@@ -1,0 +1,45 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function MatchHistory({ userId }) {
+    const [matches, setMatches] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMatches = async () => {
+            try {
+                const response = await axios.get(`/api/user/matches/${userId}`);
+                setMatches(response.data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMatches();
+    }, [userId]);
+
+    if (loading) return <div>Caricamento...</div>;
+
+    return (
+        <div className="match-history">
+            <h3>Le tue ultime partite</h3>
+            <ul>
+                {matches.map(match => (
+                    <li key={match.id}>
+                        <p>VS: {match.player1_id === userId ? 
+                            `User#${match.player2_id}` : 
+                            `User#${match.player1_id}`}</p>
+                        <p>Esito: {match.winner_id === userId ? 
+                            'Vittoria' : 
+                            match.winner_id ? 'Sconfitta' : 'Pareggio'}</p>
+                        <p>Montepremi: {match.prize_amount}</p>
+                        <p>Data: {new Date(match.finished_at).toLocaleDateString()}</p>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+export default MatchHistory;

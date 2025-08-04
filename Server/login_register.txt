@@ -1,0 +1,124 @@
+npm install bcrypt
+
+
+
+const db = require("./connection");
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // Costo computazionale per l'hashing
+
+async function login_register(req, res) {
+    try {
+        if (req.method === "POST") {
+            let body = '';
+            
+            // Ricevi i dati dal client
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+            
+            req.on('end', async () => {
+                try {
+                    const data = JSON.parse(body);
+                    
+                    if (req.url === '/api/register') {
+                        // Gestione registrazione
+                        const { username, password } = data;
+                        
+                        // Verifica se l'utente esiste già
+                        const userExists = await db.query(
+                            'SELECT * FROM users WHERE username = ?', 
+                            [username]
+                        );
+                        
+                        if (userExists.length > 0) {
+                            return res.end(JSON.stringify({
+                                success: false,
+                                message: 'Username già in uso'
+                            }));
+                        }
+                        
+                        // Hash della password
+                        const hashedPassword = await bcrypt.hash(password, saltRounds);
+                        
+                        // Salva l'utente nel database
+                        await db.query(
+                            'INSERT INTO users (username, password) VALUES (?, ?)',
+                            [username, hashedPassword]
+                        );
+                        
+                        res.end(JSON.stringify({
+                            success: true,
+                            message: 'Registrazione completata con successo'
+                        }));
+                        
+                    } else if (req.url === '/api/login') {
+                        // Gestione login
+                        const { username, password } = data;
+                        
+                        // Recupera l'utente dal database
+                        const users = await db.query(
+                            'SELECT * FROM users WHERE username = ?',
+                            [username]
+                        );
+                        
+                        if (users.length === 0) {
+                            return res.end(JSON.stringify({
+                                success: false,
+                                message: 'Credenziali non valide'
+                            }));
+                        }
+                        
+                        const user = users[0];
+                        
+                        // Confronta la password hashata
+                        const passwordMatch = await bcrypt.compare(password, user.password);
+                        
+                        if (!passwordMatch) {
+                            return res.end(JSON.stringify({
+                                success: false,
+                                message: 'Credenziali non valide'
+                            }));
+                        }
+                        
+                        // Login riuscito (qui potresti generare un token JWT)
+                        res.end(JSON.stringify({
+                            success: true,
+                            message: 'Login effettuato con successo',
+                            user: {
+                                id: user.id,
+                                username: user.username
+                            }
+                        }));
+                        
+                    } else {
+                        res.end(JSON.stringify({
+                            success: false,
+                            message: 'Endpoint non valido'
+                        }));
+                    }
+                } catch (error) {
+                    res.end(JSON.stringify({
+                        success: false,
+                        message: 'Errore nel processing della richiesta'
+                    }));
+                }
+            });
+        } else {
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Metodo non supportato'
+            }));
+        }
+    } catch (error) {
+        console.error('Server error:', error);
+        res.end(JSON.stringify({
+            success: false,
+            message: 'Errore del server'
+        }));
+    }
+}
+
+module.exports = login_register;
+
+
+

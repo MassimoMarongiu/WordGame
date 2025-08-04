@@ -1,0 +1,17 @@
+Convertitore: Puoi trasformare il file di testo in JSON con uno script semplice:
+
+javascript
+const fs = require('fs');
+const words = fs.readFileSync('parole.txt', 'utf8').split('\n');
+fs.writeFileSync('parole.json', JSON.stringify(words));
+
+
+Importalo nel tuo progetto:
+
+javascript
+import parole from './parole.json' assert { type: 'json' };
+// o
+fetch('parole.json').then(r => r.json()).then(data => console.log(data));
+
+https://github.com/napolux/paroleitaliane/tree/main/paroleitaliane
+

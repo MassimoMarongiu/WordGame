@@ -1,0 +1,62 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+function Matchmaking() {
+    const [status, setStatus] = useState('idle'); // idle, searching, matched
+    const [match, setMatch] = useState(null);
+    const navigate = useNavigate();
+
+    const findMatch = async () => {
+        setStatus('searching');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+            const response = await axios.post('/api/match', { userId: user.id });
+            setMatch(response.data);
+            
+            if (response.data.player2_id) {
+                setStatus('matched');
+                navigate('/game'); // Avvia il gioco
+            } else {
+                // Polling per controllare se si è unito un avversario
+                const interval = setInterval(async () => {
+                    const matchUpdate = await axios.get(`/api/match/${response.data.id}`);
+                    if (matchUpdate.data.player2_id) {
+                        clearInterval(interval);
+                        setMatch(matchUpdate.data);
+                        setStatus('matched');
+                        navigate('/game');
+                    }
+                }, 3000);
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+        }
+    };
+
+    return (
+        <div>
+            {status === 'idle' && (
+                <button onClick={findMatch}>Trova avversario</button>
+            )}
+            
+            {status === 'searching' && (
+                <div>
+                    <p>Cerco un avversario...</p>
+                    <div className="loader"></div>
+                </div>
+            )}
+            
+            {status === 'matched' && match && (
+                <div>
+                    <p>Partita trovata!</p>
+                    <p>Avversario: {match.player2_id ? 'User#'+match.player2_id : 'In attesa...'}</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default Matchmaking;

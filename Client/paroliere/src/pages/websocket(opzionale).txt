@@ -1,0 +1,27 @@
+4. Websocket (opzionale, per aggiornamenti in tempo reale)
+Per una esperienza più fluida, puoi integrare websocket per:
+
+Notificare quando un avversario si unisce
+
+Aggiornare il turno in tempo reale
+
+Mostrare le mosse dell'avversario immediatamente
+
+javascript
+// Esempio con socket.io
+import io from 'socket.io-client';
+
+// Nel componente Matchmaking
+useEffect(() => {
+    const socket = io('http://localhost:3000');
+    
+    socket.on('match_update', (updatedMatch) => {
+        if (updatedMatch.player2_id) {
+            setMatch(updatedMatch);
+            setStatus('matched');
+            navigate('/game');
+        }
+    });
+
+    return () => socket.disconnect();
+}, []);

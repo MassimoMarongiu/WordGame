@@ -1,0 +1,26 @@
+movimento quando si richiedono le carte
+logo che gira su se stesso
+
+
+per il login 
+Aggiungi un limite massimo di tentativi di login
+
+Implementa un sistema di token JWT per mantenere la sessione
+
+Aggiungi logging più strutturato (es. Winston)
+
+Considera l'uso di un ORM come Sequelize o TypeORM
+
+Aggiungi la possibilità di recupero password
+
+Implementa la verifica email per la registrazione
+
+implementa modifica/eliminazione user
+
+livelli
+
+consonante 10 monete
+
+vocale 20 monete
+
+

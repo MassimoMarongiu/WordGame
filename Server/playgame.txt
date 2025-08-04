@@ -1,0 +1,43 @@
+// Cerca o crea una partita
+app.post('/api/match', async (req, res) => {
+    const { userId } = req.body;
+    
+    // Cerca una partita in attesa
+    const waitingMatch = await Match.findOne({ 
+        where: { 
+            status: 'waiting',
+            player1_id: { [Op.ne]: userId } // Escludi partite dove l'utente è già player1
+        } 
+    });
+
+    if (waitingMatch) {
+        // Unisciti alla partita esistente
+        waitingMatch.player2_id = userId;
+        waitingMatch.status = 'in_progress';
+        await waitingMatch.save();
+        return res.json(waitingMatch);
+    } else {
+        // Crea una nuova partita
+        const newMatch = await Match.create({
+            player1_id: userId,
+            status: 'waiting'
+        });
+        return res.json(newMatch);
+    }
+});
+
+// Ottieni storico partite
+app.get('/api/user/matches/:userId', async (req, res) => {
+    const matches = await Match.findAll({
+        where: {
+            [Op.or]: [
+                { player1_id: req.params.userId },
+                { player2_id: req.params.userId }
+            ],
+            status: 'completed'
+        },
+        order: [['finished_at', 'DESC']],
+        limit: 10
+    });
+    res.json(matches);
+});
