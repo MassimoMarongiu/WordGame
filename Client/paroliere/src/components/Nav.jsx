@@ -1,33 +1,30 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import '../styles/nav.css';  
 
-
-function Nav (){
-
-    const navStyle={
-        display:"flex",
-        flexDirection:"column",
-        background:"blue",
-        color:"white"
-    }
-   const [showNav, setShowNav] = useState(false);
+function Nav() {
+    const [showNav, setShowNav] = useState(false);
 
     const handleDisplayNav = () => {
         setShowNav(prev => !prev);
     };
+    
     return (
-    <div style={navStyle}>
-        <button onClick={handleDisplayNav}>...</button>
-          {showNav && (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    {/* <Link to="/login_register">Login/Register</Link> */}
+        <div className={showNav ? "nav-open" : "nav-closed"}>
+            <button className="nav-toggle-btn" onClick={handleDisplayNav}>
+                Menù
+            </button>
+            <div>
+
+            {showNav && (
+                <div className="nav-links">
                     <Link to="/userProfile">Il mio Profilo</Link>
                     <Link to="/logout">Logout</Link>
                 </div>
             )}
-    </div>);
-
-
+            </div>
+        </div>
+    );
 }
 
 export default Nav;

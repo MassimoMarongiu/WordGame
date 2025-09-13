@@ -5,6 +5,8 @@ import InGame from "./InGame";
 import Credits from "./Credits";
 import { Link } from "react-router-dom";
 import useUserState from "./UserState"
+import "../styles/buttonStyle.css"
+
 function MainComponent() {
 
     const userState = useUserState();
@@ -19,26 +21,15 @@ function MainComponent() {
         backgroundColor: "#f0f0f0"
     }
 
-    const linkStyle = {
-        textDecoration: "none",
-        color: "inherit",
-        padding: "8px 12px",
-        borderRadius: "4px",
-        transition: "background-color 0.3s",
-        ':hover': {
-            backgroundColor: "#e0e0e0"
-        }
-    }
-    // console.log("userState " + userState);
     return (
         <div>
             {userState === 'on' ? (
                 <div>
-                    <Link to="/usersList" style={linkStyle}>Users List</Link>
-                    <Link to="/playGame" style={linkStyle}>PLAY</Link>
+                    {/* <Link to="/usersList" style={linkStyle}>Users List</Link> */}
+                    <Link to="/playGame" class="playButtonStyle">PLAY</Link>
                 </div>
             ) : (
-                <Link to="/login_register" style={linkStyle}>Login/Register</Link>
+                <Link to="/login_register" class="playButtonStyle">Login/Register</Link>
             )}
         </div>
     )

@@ -3,7 +3,7 @@ import { removeSelected } from "../redux/lettersSlice";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { resetAllSelectedLetters } from "../redux/lettersSlice";
-
+import "../styles/buttonStyle.css"
 function SelectedLetters() {
 
     const containerStyle = {
@@ -103,7 +103,7 @@ function SelectedLetters() {
                 )}
             </div>
             <div>
-                <button onClick={resetChoosedLetter}>CANCELLA</button>
+                <button onClick={resetChoosedLetter} class="playButtonStyle">CANCELLA</button>
             </div>
         </div>
 

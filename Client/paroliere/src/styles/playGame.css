@@ -1,0 +1,83 @@
+.playgame-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: auto;
+    position: relative;
+}
+
+.playgame-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.playgame-username {
+    font-size: 5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Stili responsivi */
+@media (max-width: 768px) {
+    .playgame-container {
+        padding: 10px;
+        justify-content: flex-start;
+        min-height: 100vh;
+        height: auto;
+    }
+
+    .playgame-content {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .playgame-username {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .playgame-username {
+        font-size: 1.8rem;
+    }
+
+    .playgame-content {
+        padding: 10px;
+        gap: 10px;
+    }
+}
+
+/* Assicurati che il componente InGame sia responsive */
+.ingame-container {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+/* Prevenire overflow orizzontale */
+body {
+    overflow-x: hidden;
+}
+
+/* Gestione dello scrolling per contenuti lunghi */
+.scrollable-content {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    width: 100%;
+}

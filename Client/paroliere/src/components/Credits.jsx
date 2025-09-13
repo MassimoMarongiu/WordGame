@@ -12,17 +12,20 @@ function Credits({ refreshTrigger }) {
             gap: "20px",
             padding: '1rem',
             border: '1px solid #4a4a4a',
-            borderRadius: '8px',        
+            borderRadius: '8px',    
+             fontSize: '3rem',    
+             alignItem:"center",
+              color: ' #FFD700'
         },
         creditsAmount: {
-          fontSize: '1.5rem',
+         
             fontWeight: 'bold',
             color: '#ffd700'
         },
            titleCredits: {
             fontSize: '1.5rem',
             fontWeight: 'bold',
-            color: '#ffffff'
+           
         }
     };
 

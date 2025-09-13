@@ -3,6 +3,7 @@ import Button from "./Button";
 import { useState, useEffect, useRef } from "react";
 // import { useDispatch } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";  // Aggiungi useSelector
+import "../styles/buttonStyle.css"
 
 // import { add, resetLetters } from "../redux/lettersSlice";
 import { add, resetLetters, addMultipleLetters } from "../redux/lettersSlice";
@@ -14,6 +15,7 @@ import Credits from "./Credits";
 import PrizeAmount from "./PrizeAmount";
 import useUserState from "./UserState";
 import { useNavigate } from "react-router-dom";
+import "../styles/buttonStyle.css"
 
 function InGame() {
     const userState = useUserState();
@@ -51,7 +53,7 @@ function InGame() {
         border: "2px dashed #ccc solid",
         borderColor: "black",
         borderRadius: "8px",
-        backgroundColor: "green",
+        backgroundColor: "#175e0e",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -253,11 +255,7 @@ function InGame() {
 
     return (
         <div>
-            <Button
-                id="reset"
-                buttonName="ESCI"
-                onClick={handleResetGame}
-            />
+   
 
             {userState === 'on' ? (
                 <>
@@ -283,13 +281,13 @@ function InGame() {
                             buttonName="Vocal (-10 monete)"
                             onClick={handleVocalClick}
                         />
-                        <button>Fold</button>
+                        <button class="playButtonStyle">Fold</button>
                     </div>
 
                     <div>
                         <MyCards loading={loading} />
                     </div>
-                    <button>Conferma</button>
+                    <button class="playButtonStyle">Conferma</button>
                     {/* icona tempo e tempo */}
                     <SelectedLetters />
 
@@ -297,8 +295,13 @@ function InGame() {
             ) : (
                 <div>Verifica dello stato dell'utente in corso...</div>
             )}
-
+         <Button
+                id="reset"
+                buttonName="ESCI"
+                onClick={handleResetGame}
+            />
         </div>
+
     );
 }
 
